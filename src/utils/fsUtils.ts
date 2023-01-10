@@ -1,11 +1,10 @@
 import path from "path";
 import {
   existsSync,
-  mkdirSync,
   lstatSync,
-  writeFileSync,
   readFileSync,
   PathOrFileDescriptor,
+  PathLike,
 } from "fs";
 import fsUtils from "../utils/fsUtils.js";
 import { Result, wrapThrowable } from "../types/result.js";
@@ -19,36 +18,28 @@ function getTwdDirPath(): string {
   return directoryPath;
 }
 
+function fileExists(path: PathLike): boolean {
+  return existsSync(path) && lstatSync(path).isFile();
+}
+
+function dirExists(path: PathLike): boolean {
+  return existsSync(path) && lstatSync(path).isDirectory();
+}
+
 function twdDirExists(): boolean {
   const directoryPath = fsUtils.getTwdDirPath();
 
   return existsSync(directoryPath) && lstatSync(directoryPath).isDirectory();
 }
 
-function mkTwdDirIfNotExists(): "created" | "alreadyExists" {
-  if (twdDirExists()) return "alreadyExists";
-
-  mkdirSync(getTwdDirPath());
-  return "created";
+function configFileExists(): boolean {
+  return fileExists(path.join(getTwdDirPath(), fileNames.config));
 }
 
 function runningFromProjectRoot(): boolean {
   const pkgJsonPath = path.join(process.cwd(), "package.json");
 
   return existsSync(pkgJsonPath) && lstatSync(pkgJsonPath).isFile();
-}
-
-function makeDefaultConfig(): Result<void> {
-  const defaultFile = JSON.stringify({
-    colorProperties: [],
-  });
-
-  const errMsg = ``;
-  return wrapThrowable(() => {
-    writeFileSync(path.join(getTwdDirPath(), fileNames.config), defaultFile, {
-      encoding: "utf8",
-    });
-  }, errMsg);
 }
 
 function readFile(
@@ -68,9 +59,10 @@ export default {
   getTwdDirPath,
   twdDirName,
   twdDirExists,
-  mkTwdDirIfNotExists,
   runningFromProjectRoot,
   fileNames,
   readFile,
-  makeDefaultConfig,
+  fileExists,
+  dirExists,
+  configFileExists,
 } as const;

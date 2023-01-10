@@ -4,12 +4,14 @@ import inquirer from "inquirer";
 import fsUtils from "../utils/fsUtils.js";
 import errorMessages from "../utils/errorMessages.js";
 import query from "../utils/query.js";
+import chalk from "chalk";
 
 export default async function add(): Promise<void> {
   // clear the screen
   clear();
 
-  console.log(`running "tw-designer add"...`);
+  // announce the process being run
+  console.log(`running ${chalk.blue("tw-designer add")}...`, "\n");
 
   // make sure the command is being run from the project root.
   const runningFromProjectRoot = fsUtils.runningFromProjectRoot();
