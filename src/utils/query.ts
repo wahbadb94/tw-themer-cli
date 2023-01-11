@@ -1,6 +1,7 @@
 import path from "path";
 import { ColorProperty } from "../tw-properties.js";
-import { ok, Result } from "../types/result.js";
+import { result, Result } from "../types/result.js";
+import { TwDesignerConfig } from "../types/twDesignerConfig.js";
 import fsUtils from "./fsUtils.js";
 import { matchTagged } from "./unionUtils.js";
 
@@ -16,13 +17,25 @@ function colorPropertiesGet(): Result<ColorProperty[]> {
     err: (e) => e,
     ok: ({ data }) => {
       const obj = JSON.parse(data);
-      return ok(obj.colorProperties ?? []);
+      return result.ok(obj.colorProperties ?? []);
     },
   });
 }
 
-function colorPropertiesSet(): void {
-  console.log("setting color properties...");
+function colorPropertiesSet(colorProperties: ColorProperty[]): Result<void> {
+  const configResult = fsUtils.parseConfigFile();
+
+  if (configResult.tag === "err") {
+    return configResult;
+  }
+
+  const { data: config } = configResult;
+  const newConfig: TwDesignerConfig = {
+    ...config,
+    colorProperties,
+  };
+
+  return fsUtils.writeConfigFile(newConfig);
 }
 
 export default {

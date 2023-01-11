@@ -1,8 +1,7 @@
 import chalk from "chalk";
 import { clear } from "console";
-import { mkdirSync, writeFileSync } from "fs";
+import { mkdirSync } from "fs";
 import path from "path";
-import { wrapThrowable } from "../types/result.js";
 import errorMessages from "../utils/errorMessages.js";
 import fsUtils from "../utils/fsUtils.js";
 import { matchTagged } from "../utils/unionUtils.js";
@@ -25,24 +24,12 @@ export default function init(): void {
   }
 
   if (!fsUtils.configFileExists()) {
-    const defaultFile = JSON.stringify(
+    const makeConfigResult = fsUtils.writeObjToJSONFile(
+      path.join(fsUtils.getTwdDirPath(), fsUtils.fileNames.config),
       {
         colorProperties: [],
-      },
-      null,
-      4
+      }
     );
-
-    const errMsg = `Error while creating ${fsUtils.fileNames.config}`;
-    const makeConfigResult = wrapThrowable(() => {
-      writeFileSync(
-        path.join(fsUtils.getTwdDirPath(), fsUtils.fileNames.config),
-        defaultFile,
-        {
-          encoding: "utf8",
-        }
-      );
-    }, errMsg);
 
     const configFailed = matchTagged(makeConfigResult).on<boolean | void>({
       ok: () => {

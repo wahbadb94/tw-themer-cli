@@ -22,8 +22,18 @@ function makeErrorMessageWithInner(mainMsg: string) {
   };
 }
 
+const errorParseColorProperties = makeErrorMessageWithInner(
+  "Error while parsing currently configured colorProperties."
+);
+
+const errorSettingColorProperties = makeErrorMessageWithInner(
+  "Error while setting the selected properties."
+);
+
 export default {
   root,
   needsInit,
   makeErrorMessageWithInner,
+  errorSettingColorProperties,
+  errorParseColorProperties,
 };

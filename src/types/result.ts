@@ -10,18 +10,23 @@ export type Err = {
   message: string;
 };
 
-export function ok<T>(data: T): Ok<T> {
+function ok<T>(data: T): Ok<T> {
   return {
     tag: "ok",
     data,
   };
 }
-export function err(message: string): Err {
+function err(message: string): Err {
   return {
     tag: "err",
     message,
   };
 }
+
+export const result = {
+  ok,
+  err,
+};
 
 export function wrapThrowable<T>(
   throws: () => T,

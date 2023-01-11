@@ -1,16 +1,14 @@
 import { clear } from "console";
-import { ColorProperty, ColorProperties } from "../tw-properties.js";
+import { ColorProperty } from "../tw-properties.js";
 import inquirer from "inquirer";
 import fsUtils from "../utils/fsUtils.js";
 import errorMessages from "../utils/errorMessages.js";
 import query from "../utils/query.js";
 import chalk from "chalk";
 
-export default async function add(): Promise<void> {
-  // clear the screen
+export default async function remove(): Promise<void> {
   clear();
 
-  // announce the process being run
   console.log(`running ${chalk.blue("tw-designer add")}...`, "\n");
 
   // make sure the command is being run from the project root.
@@ -36,24 +34,21 @@ export default async function add(): Promise<void> {
   const { data: existingProperties } = colorPropsResult;
 
   // let the user pick from properties not yet under our control
-  const { propsToAdd } = (await inquirer.prompt({
-    name: "propsToAdd",
+  const { propsToRemove } = (await inquirer.prompt({
+    name: "propsToRemove",
     type: "checkbox",
-    message: "Select properties to add",
-    choices: ColorProperties.filter(
-      (p) => !existingProperties.includes(p)
-    ).sort(),
-  })) as { propsToAdd: ColorProperty[] };
+    message: "Select properties to remove",
+    choices: existingProperties,
+  })) as { propsToRemove: ColorProperty[] };
 
-  const setPropertiesResult = query.colorProperties.set([
-    ...existingProperties,
-    ...propsToAdd,
-  ]);
+  const setPropertiesResult = query.colorProperties.set(
+    existingProperties.filter((p) => !propsToRemove.includes(p))
+  );
   if (setPropertiesResult.tag === "err") {
     console.log(
       errorMessages.errorSettingColorProperties(setPropertiesResult.message)
     );
   }
 
-  console.log(chalk.green(`✅ Added: ${propsToAdd}`), "\n");
+  console.log(chalk.green(`✅ Removed: ${propsToRemove}`), "\n");
 }
