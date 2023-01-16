@@ -7,7 +7,9 @@ ${chalk.red(`❌ Error: Could not find a "package.json" file.`)}
 `;
 
 const needsInit = `
-${chalk.red(`❌ Error: Could not find the "${fsUtils.twdDirName}" directory.`)} 
+${chalk.red(
+  `❌ Error: Could not find the "${fsUtils.dirNames.twdBase}" directory.`
+)} 
   - Do you need to run ${chalk.blue(`tw-designer init`)} ?
 `;
 
@@ -22,18 +24,18 @@ function makeErrorMessageWithInner(mainMsg: string) {
   };
 }
 
-const errorParseColorProperties = makeErrorMessageWithInner(
-  "Error while parsing currently configured colorProperties."
+const errorReadingConfig = makeErrorMessageWithInner(
+  "Error while parsing the current configuration file."
 );
 
-const errorSettingColorProperties = makeErrorMessageWithInner(
-  "Error while setting the selected properties."
+const errorWhileWritingFile = makeErrorMessageWithInner(
+  "Error while updating the configuration file."
 );
 
 export default {
   root,
   needsInit,
   makeErrorMessageWithInner,
-  errorSettingColorProperties,
-  errorParseColorProperties,
+  errorWhileWritingFile,
+  errorReadingConfig,
 };

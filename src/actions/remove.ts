@@ -27,7 +27,7 @@ export default async function remove(): Promise<void> {
   const colorPropsResult = query.colorProperties.get();
   if (colorPropsResult.tag === "err") {
     return console.log(
-      errorMessages.errorParseColorProperties(colorPropsResult.message)
+      errorMessages.errorReadingConfig(colorPropsResult.message)
     );
   }
 
@@ -46,7 +46,7 @@ export default async function remove(): Promise<void> {
   );
   if (setPropertiesResult.tag === "err") {
     console.log(
-      errorMessages.errorSettingColorProperties(setPropertiesResult.message)
+      errorMessages.errorWhileWritingFile(setPropertiesResult.message)
     );
   }
 

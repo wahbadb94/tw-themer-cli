@@ -23,19 +23,24 @@ function colorPropertiesGet(): Result<ColorProperty[]> {
 }
 
 function colorPropertiesSet(colorProperties: ColorProperty[]): Result<void> {
-  const configResult = fsUtils.parseConfigFile();
+  const configParseResult = fsUtils.parseConfigFile();
 
-  if (configResult.tag === "err") {
-    return configResult;
+  if (configParseResult.tag === "err") {
+    return configParseResult;
   }
 
-  const { data: config } = configResult;
+  const { data: config } = configParseResult;
   const newConfig: TwDesignerConfig = {
     ...config,
     colorProperties,
   };
 
-  return fsUtils.writeConfigFile(newConfig);
+  const configWriteResult = fsUtils.writeConfigFile(newConfig);
+  if (configWriteResult.tag === "err") {
+    return configWriteResult;
+  }
+
+  return fsUtils.writeTsFiles(newConfig);
 }
 
 export default {

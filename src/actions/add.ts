@@ -1,10 +1,14 @@
 import { clear } from "console";
-import { ColorProperty, ColorProperties } from "../tw-properties.js";
+import {
+  ColorProperty,
+  ColorProperties,
+  DefaultClassNames,
+} from "../tw-properties.js";
 import inquirer from "inquirer";
 import fsUtils from "../utils/fsUtils.js";
 import errorMessages from "../utils/errorMessages.js";
-import query from "../utils/query.js";
 import chalk from "chalk";
+import { TwDesignerConfig } from "../types/twDesignerConfig.js";
 
 export default async function add(): Promise<void> {
   // clear the screen
@@ -25,15 +29,15 @@ export default async function add(): Promise<void> {
     return console.log(errorMessages.needsInit);
   }
 
-  // check which properties have already been put under our control
-  const colorPropsResult = query.colorProperties.get();
-  if (colorPropsResult.tag === "err") {
+  // load the existing config file
+  const existingConfigResult = fsUtils.parseConfigFile();
+  if (existingConfigResult.tag === "err") {
     return console.log(
-      errorMessages.errorParseColorProperties(colorPropsResult.message)
+      errorMessages.errorReadingConfig(existingConfigResult.message)
     );
   }
 
-  const { data: existingProperties } = colorPropsResult;
+  const config = existingConfigResult.data;
 
   // let the user pick from properties not yet under our control
   const { propsToAdd } = (await inquirer.prompt({
@@ -41,17 +45,43 @@ export default async function add(): Promise<void> {
     type: "checkbox",
     message: "Select properties to add",
     choices: ColorProperties.filter(
-      (p) => !existingProperties.includes(p)
+      (p) => !config.colorProperties.includes(p)
     ).sort(),
   })) as { propsToAdd: ColorProperty[] };
 
-  const setPropertiesResult = query.colorProperties.set([
-    ...existingProperties,
-    ...propsToAdd,
-  ]);
-  if (setPropertiesResult.tag === "err") {
-    console.log(
-      errorMessages.errorSettingColorProperties(setPropertiesResult.message)
+  // ask the user for a class name for each.
+  const classNames = await propsToAdd.reduce(async (accPromise, prop) => {
+    const acc = await accPromise;
+    const { className } = (await inquirer.prompt({
+      name: "className",
+      type: "input",
+      message: `Class name for "${prop}"`,
+      default: DefaultClassNames[prop],
+    })) as { className: string };
+
+    acc[prop] = className;
+    return acc;
+  }, {} as Promise<Record<ColorProperty, string>>);
+
+  const newConfigObject: TwDesignerConfig = {
+    colorProperties: [...config.colorProperties, ...propsToAdd],
+    classNames: {
+      ...config.classNames,
+      ...classNames,
+    },
+  };
+
+  const updateConfigResult = fsUtils.writeConfigFile(newConfigObject);
+  if (updateConfigResult.tag === "err") {
+    return console.log(
+      errorMessages.errorWhileWritingFile(updateConfigResult.message)
+    );
+  }
+
+  const updateTsFileResult = fsUtils.writeTsFiles(newConfigObject);
+  if (updateTsFileResult.tag === "err") {
+    return console.log(
+      errorMessages.errorWhileWritingFile(updateTsFileResult.message)
     );
   }
 
