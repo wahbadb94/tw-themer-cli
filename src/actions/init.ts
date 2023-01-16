@@ -111,7 +111,6 @@ const configError = errorMessages.makeErrorMessageWithInner(
 
 const readyMsg = (nodeTypesInstalled: boolean) => `
 ${nodeTypesInstalled ? "" : nodeTypesHelp}
-
 ${
   nodeTypesInstalled
     ? chalk.green(chalk.green("Everything looks good! 🎉"))
@@ -122,4 +121,5 @@ ${
 
 const nodeTypesHelp = `
 Could not find ${chalk.blue("@types/node")} as a devDependency.
-  - run ${chalk.blue("npm i -D @types/node")} to install.`;
+  - run ${chalk.blue("npm i -D @types/node")} to install.
+`;

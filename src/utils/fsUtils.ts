@@ -111,7 +111,7 @@ ${colorProperties.map((cp) => `  ${cp}: "${classNames[cp]}",`).join("\n")}
 
 export const ThemeableProperties = [
 ${colorProperties.map((cp) => `  "${classNames[cp]}",`).join("\n")}
-]as const;
+] as const;
 
 export type ThemeableProperty = {
   [K in keyof typeof twToPropMap]: typeof twToPropMap[K];
