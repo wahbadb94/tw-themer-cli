@@ -1,5 +1,5 @@
 const src = `
-import { ThemeDefinition } from "../../themeDefinition";
+import { ThemeDefinition } from "../themeDefinition";
 import { propToTwMap, ThemeableProperty } from "./types/properties";
 import {
   PropertyAndStatesConfig,

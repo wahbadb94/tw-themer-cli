@@ -87,7 +87,7 @@ export default function init(): void {
     if (configFailed) return;
   }
 
-  // read the package.json and check if @types/node is a dev depdendency.
+  // read the package.json and check for required devDependencies.
   const fileResult = fsUtils.readFile(path.join("package.json"), "utf8");
   if (fileResult.tag === "err") {
     return console.log(fileResult.message);
@@ -97,29 +97,29 @@ export default function init(): void {
     devDependencies?: Record<string, string>;
   };
   const searchObj = { ...devDependencies };
-  const nodeTypesInstalled = Object.keys(searchObj).some(
-    (k) => k === "@types/node"
+  const requiredDevDeps = ["typescript", "ts-node", "@types/node"];
+  const needsToInstall = requiredDevDeps.filter(
+    (d) => !Object.keys(searchObj).includes(d)
   );
 
   // let the user know they are ready to begin using the tool.
-  console.log(readyMsg(nodeTypesInstalled));
+  console.log(readyMsg(needsToInstall));
 }
 
 const configError = errorMessages.makeErrorMessageWithInner(
   "Error while creating the defaultConfigFile."
 );
 
-const readyMsg = (nodeTypesInstalled: boolean) => `
-${nodeTypesInstalled ? "" : nodeTypesHelp}
+const readyMsg = (needsToInstall: string[]) => `
 ${
-  nodeTypesInstalled
+  needsToInstall.length === 0
+    ? ""
+    : errorMessages.requiredDepsHelp(needsToInstall)
+}
+${
+  needsToInstall.length === 0
     ? chalk.green(chalk.green("Everything looks good! 🎉"))
     : "Then:"
 }
   - run ${chalk.blue("tw-designer add")} to begin themeing tailwind properties.
-`;
-
-const nodeTypesHelp = `
-Could not find ${chalk.blue("@types/node")} as a devDependency.
-  - run ${chalk.blue("npm i -D @types/node")} to install.
 `;

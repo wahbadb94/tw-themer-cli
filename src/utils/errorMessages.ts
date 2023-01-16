@@ -32,10 +32,18 @@ const errorWhileWritingFile = makeErrorMessageWithInner(
   "Error while updating the configuration file."
 );
 
+const requiredDepsHelp = (needsToInstall: string[]) => `
+${chalk.yellow(
+  `Missing devDependencies: ${chalk.red(needsToInstall.join(", "))}`
+)}
+  - run ${chalk.blue(`npm i -D ${needsToInstall.join(" ")}`)} to install.
+`;
+
 export default {
   root,
   needsInit,
   makeErrorMessageWithInner,
   errorWhileWritingFile,
   errorReadingConfig,
+  requiredDepsHelp,
 };
