@@ -1,12 +1,17 @@
-const src = `
-import { ThemeDefinition } from "../themeDefinition";
-import { propToTwMap, ThemeableProperty } from "./types/properties";
+import { ProjectType } from "../../types/projectType.js";
+import fileExt from "../../utils/fileExt.js";
+
+const src = (type: ProjectType) => `
+import { ThemeDefinition } from "../themeDefinition${fileExt.getExt.ts(type)}";
+import { propToTwMap, ThemeableProperty } from "./types/properties${fileExt.getExt.ts(
+  type
+)}";
 import {
   PropertyAndStatesConfig,
   PropertyStateValues,
   StatesConfig,
   ThemeGenVariableConfig,
-} from "./types/derived";
+} from "./types/derived${fileExt.getExt.ts(type)}";
 
 /** */
 export function serializeTheme(

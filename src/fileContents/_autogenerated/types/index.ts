@@ -1,4 +1,7 @@
-const src = `
+import { ProjectType } from "../../../types/projectType.js";
+import fileExt from "../../../utils/fileExt.js";
+
+const src = (type: ProjectType) => `
 export {
   ExtendableTailwindProperties,
   ExtendableTailwindProperty,
@@ -6,7 +9,7 @@ export {
   ThemeableProperty,
   propToTwMap,
   twToPropMap,
-} from "./properties";
+} from "./properties${fileExt.getExt.ts(type)}";
 export {
   HexColor,
   PropertyAndStatesConfig,
@@ -15,7 +18,7 @@ export {
   StatesConfig,
   ThemeGenVariableConfig,
   Themed,
-} from "./derived";
+} from "./derived${fileExt.getExt.ts(type)}";
 `;
 
 export default src;

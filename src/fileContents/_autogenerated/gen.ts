@@ -1,8 +1,13 @@
-const src = `
+import { ProjectType } from "../../types/projectType.js";
+import fileExt from "../../utils/fileExt.js";
+
+const src = (type: ProjectType) => `
 import * as fs from "fs";
-import { ThemeDefinition } from "../themeDefinition";
-import { serializeTheme } from "./serialize";
-import { ExtendableTailwindProperties } from "./types/properties";
+import { ThemeDefinition } from "../themeDefinition${fileExt.getExt.ts(type)}";
+import { serializeTheme } from "./serialize${fileExt.getExt.ts(type)}";
+import { ExtendableTailwindProperties } from "./types/properties${fileExt.getExt.ts(
+  type
+)}";
 
 export function generateTwThemeExtensions(
   theme: ThemeDefinition,

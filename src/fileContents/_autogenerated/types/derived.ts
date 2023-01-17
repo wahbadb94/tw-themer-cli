@@ -1,5 +1,10 @@
-const src = `
-import { ExtendableTailwindProperty, ThemeableProperty } from "./properties";
+import { ProjectType } from "../../../types/projectType.js";
+import fileExt from "../../../utils/fileExt.js";
+
+const src = (type: ProjectType) => `
+import { ExtendableTailwindProperty, ThemeableProperty } from "./properties${fileExt.getExt.ts(
+  type
+)}";
 
 export type ThemeGenVariableConfig = {
   twType: ExtendableTailwindProperty;

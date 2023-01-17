@@ -4,6 +4,7 @@ import errorMessages from "../utils/errorMessages.js";
 import fsUtils from "../utils/fsUtils.js";
 import { clear } from "console";
 import chalk from "chalk";
+import { ProjectType } from "../types/projectType.js";
 
 export default function (): void {
   clear();
@@ -18,14 +19,12 @@ export default function (): void {
   }
 
   // read the package.json and check for required devDependencies.
-  const fileResult = fsUtils.readFile(path.join("package.json"), "utf8");
-  if (fileResult.tag === "err") {
-    return console.log(fileResult.message);
+  const pjsonResult = fsUtils.readPackageJSON();
+  if (pjsonResult.tag === "err") {
+    return console.log(pjsonResult.message);
   }
+  const { devDependencies, type = "commonjs" } = pjsonResult.data;
 
-  const { devDependencies } = JSON.parse(fileResult.data) as {
-    devDependencies?: Record<string, string>;
-  };
   const searchObj = { ...devDependencies };
   const requiredDevDeps = ["typescript", "ts-node", "@types/node"];
   const needsToInstall = requiredDevDeps.filter(
@@ -42,28 +41,34 @@ export default function (): void {
     fsUtils.fileNames.genScript
   );
 
-  runScript(genScriptPath);
+  runScript(genScriptPath, type);
 }
 
-function runScript(scriptPath: string) {
-  childProcess.exec(`npx ts-node ${scriptPath}`, (error, stdout, stderr) => {
-    if (error) {
-      return console.log(
-        errorMessages.makeErrorMessageWithInner(
-          `Error while running ${scriptPath}.`
-        )(`Error: ${error.message}`)
-      );
-    }
-    if (stderr) {
-      return console.log(
-        errorMessages.makeErrorMessageWithInner(
-          `Error while running ${scriptPath}.`
-        )(`From stderr: ${stderr}`)
-      );
-    }
+function runScript(scriptPath: string, type: ProjectType) {
+  childProcess.exec(
+    `npx ${tsNodeCommand(type)} ${scriptPath}`,
+    (error, stdout, stderr) => {
+      if (error) {
+        return console.log(
+          errorMessages.makeErrorMessageWithInner(
+            `Error while running ${scriptPath}.`
+          )(`Error: ${error.message}`)
+        );
+      }
+      if (stderr) {
+        return console.log(
+          errorMessages.makeErrorMessageWithInner(
+            `Error while running ${scriptPath}.`
+          )(`From stderr: ${stderr}`)
+        );
+      }
 
-    if (stdout) {
-      console.log(stdout);
+      if (stdout) {
+        console.log(stdout);
+      }
     }
-  });
+  );
 }
+
+const tsNodeCommand = (type: ProjectType) =>
+  type === "module" ? "ts-node --esm" : "ts-node";
