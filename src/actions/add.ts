@@ -3,7 +3,7 @@ import {
   ColorProperty,
   ColorProperties,
   DefaultClassNames,
-} from "../tw-properties.js";
+} from "../types/tw-properties.js";
 import inquirer from "inquirer";
 import fsUtils from "../utils/fsUtils.js";
 import errorMessages from "../utils/errorMessages.js";

@@ -1,4 +1,4 @@
-import { ColorProperty } from "../tw-properties.js";
+import { ColorProperty } from "./tw-properties.js";
 
 export type TwDesignerConfig = {
   colorProperties: ColorProperty[];

@@ -1,5 +1,5 @@
 import { clear } from "console";
-import { ColorProperty } from "../tw-properties.js";
+import { ColorProperty } from "../types/tw-properties.js";
 import inquirer from "inquirer";
 import fsUtils from "../utils/fsUtils.js";
 import errorMessages from "../utils/errorMessages.js";
