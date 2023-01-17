@@ -3,13 +3,13 @@ import { ColorProperty } from "../tw-properties.js";
 import inquirer from "inquirer";
 import fsUtils from "../utils/fsUtils.js";
 import errorMessages from "../utils/errorMessages.js";
-import query from "../utils/query.js";
 import chalk from "chalk";
+import { TwDesignerConfig } from "../types/twDesignerConfig.js";
 
 export default async function remove(): Promise<void> {
   clear();
 
-  console.log(`running ${chalk.blue("tw-designer add")}...`, "\n");
+  console.log(`running ${chalk.blue("tw-designer remove")}...`, "\n");
 
   // make sure the command is being run from the project root.
   const runningFromProjectRoot = fsUtils.runningFromProjectRoot();
@@ -24,14 +24,17 @@ export default async function remove(): Promise<void> {
   }
 
   // check which properties have already been put under our control
-  const colorPropsResult = query.colorProperties.get();
-  if (colorPropsResult.tag === "err") {
+  const existingConfigResult = fsUtils.parseConfigFile();
+  if (existingConfigResult.tag === "err") {
     return console.log(
-      errorMessages.errorReadingConfig(colorPropsResult.message)
+      errorMessages.errorReadingConfig(existingConfigResult.message)
     );
   }
 
-  const { data: existingProperties } = colorPropsResult;
+  const {
+    colorProperties: existingProperties,
+    classNames: existingClassNames,
+  } = existingConfigResult.data;
 
   // let the user pick from properties not yet under our control
   const { propsToRemove } = (await inquirer.prompt({
@@ -41,12 +44,32 @@ export default async function remove(): Promise<void> {
     choices: existingProperties,
   })) as { propsToRemove: ColorProperty[] };
 
-  const setPropertiesResult = query.colorProperties.set(
-    existingProperties.filter((p) => !propsToRemove.includes(p))
+  // calculate the new config
+  const newProperties = existingProperties.filter(
+    (p) => !propsToRemove.includes(p)
   );
-  if (setPropertiesResult.tag === "err") {
-    console.log(
-      errorMessages.errorWhileWritingFile(setPropertiesResult.message)
+  const newConfigObject: TwDesignerConfig = {
+    colorProperties: newProperties,
+    classNames: newProperties.reduce(
+      (acc, prop) => ({
+        ...acc,
+        [prop]: existingClassNames[prop],
+      }),
+      {} as Record<ColorProperty, string>
+    ),
+  };
+
+  const updateConfigResult = fsUtils.writeConfigFile(newConfigObject);
+  if (updateConfigResult.tag === "err") {
+    return console.log(
+      errorMessages.errorWhileWritingFile(updateConfigResult.message)
+    );
+  }
+
+  const updateTsFileResult = fsUtils.writeTsFiles(newConfigObject);
+  if (updateTsFileResult.tag === "err") {
+    return console.log(
+      errorMessages.errorWhileWritingFile(updateTsFileResult.message)
     );
   }
 
