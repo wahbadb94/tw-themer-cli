@@ -2,15 +2,18 @@ import childProcess from "child_process";
 import path from "path";
 import errorMessages from "../utils/errorMessages.js";
 import fsUtils from "../utils/fsUtils.js";
-import { clear } from "console";
 import chalk from "chalk";
 import { ProjectType } from "../types/projectType.js";
+import { RequiredDevDeps } from "../types/deps.js";
+import { clear } from "console";
 
-export default function (): void {
+type GenOptions = {
+  W: boolean;
+};
+
+export default function gen({ W: watchMode }: GenOptions): void {
   clear();
-
-  console.log(`running ${chalk.blue("tw-designer gen")}...`);
-  console.log();
+  console.log(`running ${chalk.blue("tw-designer gen")}...\n`);
 
   // make sure the command is being run from the project root.
   const runningFromProjectRoot = fsUtils.runningFromProjectRoot();
@@ -26,8 +29,7 @@ export default function (): void {
   const { devDependencies, type = "commonjs" } = pjsonResult.data;
 
   const searchObj = { ...devDependencies };
-  const requiredDevDeps = ["typescript", "ts-node", "@types/node"];
-  const needsToInstall = requiredDevDeps.filter(
+  const needsToInstall = RequiredDevDeps.filter(
     (d) => !Object.keys(searchObj).includes(d)
   );
 
@@ -41,12 +43,14 @@ export default function (): void {
     fsUtils.fileNames.genScript
   );
 
-  runScript(genScriptPath, type);
+  runScript(genScriptPath, type, watchMode);
 }
 
-function runScript(scriptPath: string, type: ProjectType) {
+function runScript(scriptPath: string, type: ProjectType, watchMode: boolean) {
   childProcess.exec(
-    `npx ${tsNodeCommand(type)} ${scriptPath}`,
+    `npx ${
+      watchMode ? tsNodeWatchCommand() : tsNodeCommand(type)
+    } ${scriptPath}`,
     (error, stdout, stderr) => {
       if (error) {
         return console.log(
@@ -70,5 +74,10 @@ function runScript(scriptPath: string, type: ProjectType) {
   );
 }
 
-const tsNodeCommand = (type: ProjectType) =>
+const tsNodeWatchCommand = (): string =>
+  // type === "module"
+  `nodemon --watch "${fsUtils.getTwdDirPath()}/**/*.ts" --exec "node --experimental-specifier-resolution=node --loader ts-node/esm"`;
+// : "";
+
+const tsNodeCommand = (type: ProjectType): string =>
   type === "module" ? "ts-node --esm" : "ts-node";

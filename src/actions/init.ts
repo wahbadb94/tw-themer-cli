@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { clear } from "console";
 import path from "path";
+import { RequiredDevDeps } from "../types/deps.js";
 import errorMessages from "../utils/errorMessages.js";
 import fsUtils from "../utils/fsUtils.js";
 import { matchTagged } from "../utils/unionUtils.js";
@@ -97,8 +98,7 @@ export default function init(): void {
     devDependencies?: Record<string, string>;
   };
   const searchObj = { ...devDependencies };
-  const requiredDevDeps = ["typescript", "ts-node", "@types/node"];
-  const needsToInstall = requiredDevDeps.filter(
+  const needsToInstall = RequiredDevDeps.filter(
     (d) => !Object.keys(searchObj).includes(d)
   );
 
