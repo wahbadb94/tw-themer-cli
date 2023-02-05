@@ -68,7 +68,7 @@ function runScript(scriptPath: string, type: ProjectType, watchMode: boolean) {
       }
 
       if (stdout) {
-        console.log(stdout);
+        return console.log(chalk.green(stdout));
       }
     }
   );

@@ -20,23 +20,49 @@ export function generateTwThemeExtensions(
   // generate the tailwind extension file content
   const tailwindThemeExtensionContent = genTailwindExtension(theme);
 
-  // write the css file
-  fs.writeFile(cssPath, cssFileContent, (err) => {
-    if (err) {
-      console.log(err);
-    }
-  });
+  // write the css file if it differs
+  const existingCssFile = fileExists(cssPath);
+  const oldCssContents = existingCssFile
+    ? fs.readFileSync(cssPath, { encoding: "utf8" })
+    : "";
 
-  // write the tailwindExtension cjs file
-  fs.writeFile(
-    tailwindThemeExtensionPath,
-    tailwindThemeExtensionContent,
-    (err) => {
-      if (err) {
-        console.log(err);
-      }
+  if (cssFileContent !== oldCssContents) {
+    if (existingCssFile) {
+      console.log("regenerated css file.");
     }
-  );
+
+    fs.writeFile(cssPath, cssFileContent, (err) => {
+      if (err) {
+        console.error(err);
+      }
+    });
+  }
+
+  // write the tailwindExtension cjs file if it differs
+  const existingExtensionFile = fileExists(tailwindThemeExtensionPath);
+  const oldThemeExtensionContents = existingExtensionFile
+    ? fs.readFileSync(tailwindThemeExtensionPath, { encoding: "utf8" })
+    : "";
+
+  if (tailwindThemeExtensionContent !== oldThemeExtensionContents) {
+    if (existingExtensionFile) {
+      console.log("regenerated tw-designer extension file.");
+    }
+
+    fs.writeFile(
+      tailwindThemeExtensionPath,
+      tailwindThemeExtensionContent,
+      (err) => {
+        if (err) {
+          console.error(err);
+        }
+      }
+    );
+  }
+}
+
+function fileExists(path: fs.PathLike): boolean {
+  return fs.existsSync(path) && fs.lstatSync(path).isFile();
 }
 
 function genCss(theme: ThemeDefinition): string {
